@@ -1,39 +1,17 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import connectDB from "./config/db";
-
+import connectDB from "./config/db.js";
+import userRoutes from "./routes/user.js";
 dotenv.config();
-connectDB();
+await connectDB();
 
 const app = express();
 
 //Middlewares
 app.use(cors());
 app.use(express.json());
-
-//specific origin code
-// const allowedOrigins = ["http://localhost:3000", "http://localhost:3001"];
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, type);
-//       } else {
-//         callback(new Error("Not allowed by CORS"));
-//       }
-//     },
-//   })
-// );
-
-// another method
-app.use(
-  cors({
-    origin: ["http://localhost:3000", "http://localhost:30001"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+app.use("/api/V1",userRoutes)
 
 const PORT = process.env.PORT || 5000;
 
@@ -53,6 +31,29 @@ app.listen(PORT, () => {
 //     res.end("Not found");
 //   }
 // });
+
+//specific origin code
+// const allowedOrigins = ["http://localhost:3000", "http://localhost:3001"];
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, type);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//   })
+// );
+
+// another method
+// app.use(
+//   cors({
+//     origin: ["http://localhost:3000", "http://localhost:30001"],
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     credentials: true,
+//   })
+// );
 
 // server.listen(5000, () => {
 //   console.log("Server running at https://localhost:5000");
