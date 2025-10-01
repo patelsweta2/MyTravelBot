@@ -3,10 +3,26 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/user.js";
+import { createClient } from "redis";
+
 dotenv.config();
 await connectDB();
 
 const app = express();
+
+const redisUrl = process.env.REDIS_URL;
+if (!redisUrl) {
+  console.log("Missing redisUrl");
+  process.exit(1);
+}
+
+export const redisClient = createClient({
+  url: redisUrl,
+});
+redisClient
+  .connect()
+  .then(() => console.log("connected to redis"))
+  .catch((err) => console.error);
 
 //Middlewares
 app.use(cors());
