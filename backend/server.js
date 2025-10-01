@@ -11,7 +11,7 @@ const app = express();
 //Middlewares
 app.use(cors());
 app.use(express.json());
-app.use("/api/V1",userRoutes)
+app.use("/api/V1", userRoutes);
 
 const PORT = process.env.PORT || 5000;
 
