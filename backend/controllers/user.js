@@ -7,7 +7,12 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import sendMail from "../config/smtp.js";
 import { getOtpHtml, getVerifyEmailHtml } from "../config/html.js";
-import { generateToken } from "../config/generateToken.js";
+import {
+  generateAccessToken,
+  generateToken,
+  revokeRefreshToken,
+  verifyRefreshToken,
+} from "../config/generateToken.js";
 
 export const signUpUser = TryCatch(async (req, res) => {
   const sanitizedBody = sanitize(req.body);
@@ -182,11 +187,63 @@ export const verifyOtp = TryCatch(async (req, res) => {
   }
 
   await redisClient.del(otpKey);
-  let user = await User.findOne({email})
-  const tokenData = await generateToken(user._id,res);
+  let user = await User.findOne({ email });
+  const tokenData = await generateToken(user._id, res);
 
   res.status(200).json({
-    message:`Welcome ${user.name}`,
-    user
-  })
+    message: `Welcome ${user.name}`,
+    user,
+  });
+});
+
+export const myProfile = TryCatch(async (req, res) => {
+  const user = req.user;
+  // const sessionId = req.sessionId;
+  // const sessionData = await redisClient.get(`session:${sessionId}`);
+  // let sessionInfo = null;
+  // if (sessionData) {
+  //   const parsedSession = JSON.parse(sessionData);
+  //   sessionInfo = {
+  //     sessionId,
+  //     loginTime: parsedSession.createdAt,
+  //     lastActivity: parsedSession.lastActivity,
+  //   };
+  // }
+  // res.json({
+  //   user,
+  //   sessionInfo,
+  // });
+  res.json({
+    user,
+  });
+});
+
+export const refreshToken = TryCatch(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    return res.status(401).json({
+      message: "Invalid refresh token",
+    });
+  }
+  const decode = await verifyRefreshToken(refreshToken);
+  if (!decode) {
+    return res.status(401).json({
+      message: "Invalid refresh token",
+    });
+  }
+  generateAccessToken(decode.id, res);
+  res.status(200).json({
+    message: "token refreshed",
+  });
+});
+
+export const logoutUser = TryCatch(async (req, res) => {
+  const userId = req.user.id;
+  await revokeRefreshToken(userId);
+  res.clearCookie("refreshToken");
+  res.clearCookie("accessToken");
+  await redisClient.del(`user:${userId}`);
+  res.json({
+    message: "Logged out successfully",
+  });
 });

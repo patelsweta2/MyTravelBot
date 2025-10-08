@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/user.js";
 import { createClient } from "redis";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 await connectDB();
@@ -27,6 +28,8 @@ redisClient
 //Middlewares
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser())
+
 app.use("/api/V1", userRoutes);
 
 const PORT = process.env.PORT || 5000;
