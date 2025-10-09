@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { server } from "../main";
-import axios from "axios";
+import api from "../apiIntercepter";
+import { toast } from "react-toastify";
 
 const AppContext = createContext(null);
 
@@ -12,9 +12,7 @@ export const AppProvider = ({ children }) => {
   async function fetchUser() {
     setLoading(true);
     try {
-      const { data } = await axios.get(`${server}/api/v1/me`, {
-        withCredentials: true,
-      });
+      const { data } = await api.get(`/api/v1/me`);
       setUser(data);
       setIsAuth(true);
     } catch (error) {
@@ -23,11 +21,21 @@ export const AppProvider = ({ children }) => {
       setLoading(false);
     }
   }
+  async function logoutUser() {
+    try {
+      const { data } = await api.post("/api/v1/logout");
+      toast.success(data.message);
+      setIsAuth(false);
+      setUser(null);
+    } catch (error) {
+      toast.error("something went wrong");
+    }
+  }
   useEffect(() => {
     fetchUser();
   }, []);
   return (
-    <AppContext.Provider value={{ setIsAuth, isAuth, user, setUser, loading }}>
+    <AppContext.Provider value={{ setIsAuth, isAuth, user, setUser, loading, logoutUser }}>
       {children}
     </AppContext.Provider>
   );
