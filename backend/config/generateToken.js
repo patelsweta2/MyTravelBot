@@ -13,15 +13,15 @@ export const generateToken = async (id, res) => {
   await redisClient.setEx(refreshTokenKey, 7 * 24 * 60 * 60, refreshToken);
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    // secure: true,
-    sameSite: "strict",
-    maxAge: 1 * 60 * 1000,
+    secure: true,
+    sameSite: "none",
+    maxAge: 15 * 60 * 1000,
   });
   res.cookie("refreshToken", refreshToken, {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     sameSite: "none",
-    // secure: true,
+    secure: true,
   });
   return { accessToken, refreshToken };
 };
@@ -47,7 +47,7 @@ export const generateAccessToken = (id, res) => {
     httpOnly: true,
     // secure: true,
     sameSite: "strict",
-    maxAge: 1 * 60 * 1000,
+    maxAge: 15 * 60 * 1000,
   });
 };
 
